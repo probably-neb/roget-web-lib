@@ -3,52 +3,52 @@
 
 use std::{borrow::Cow, collections::HashSet, num::NonZeroU8};
 
-mod solver;
-pub use solver::{Rank, Solver};
+// mod solver;
+// pub use solver::{Rank, Solver};
 
-include!(concat!(env!("OUT_DIR"), "/dictionary.rs"));
+// include!(concat!(env!("OUT_DIR"), "/dictionary.rs"));
 
-pub struct Wordle {
-    dictionary: HashSet<&'static str>,
-}
-
-impl Default for Wordle {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Wordle {
-    pub fn new() -> Self {
-        Self {
-            dictionary: HashSet::from_iter(DICTIONARY.iter().copied().map(|(word, _)| word)),
-        }
-    }
-
-    pub fn play<G: Guesser>(&self, answer: &'static str, mut guesser: G) -> Option<usize> {
-        let mut history = Vec::new();
-        // Wordle only allows six guesses.
-        // We allow more to avoid chopping off the score distribution for stats purposes.
-        for i in 1..=32 {
-            let guess = guesser.guess(&history);
-            if guess == answer {
-                guesser.finish(i);
-                return Some(i);
-            }
-            assert!(
-                self.dictionary.contains(&*guess),
-                "guess '{}' is not in the dictionary",
-                guess
-            );
-            let correctness = Correctness::compute(answer, &guess);
-            history.push(Guess {
-                word: Cow::Owned(guess),
-                mask: correctness,
-            });
-        }
-        None
-    }
-}
+// pub struct Wordle {
+//     dictionary: HashSet<&'static str>,
+// }
+//
+// impl Default for Wordle {
+//     fn default() -> Self {
+//         Self::new()
+//     }
+// }
+//
+// impl Wordle {
+//     pub fn new() -> Self {
+//         Self {
+//             dictionary: HashSet::from_iter(DICTIONARY.iter().copied().map(|(word, _)| word)),
+//         }
+//     }
+//
+//     pub fn play<G: Guesser>(&self, answer: &'static str, mut guesser: G) -> Option<usize> {
+//         let mut history = Vec::new();
+//         // Wordle only allows six guesses.
+//         // We allow more to avoid chopping off the score distribution for stats purposes.
+//         for i in 1..=32 {
+//             let guess = guesser.guess(&history);
+//             if guess == answer {
+//                 guesser.finish(i);
+//                 return Some(i);
+//             }
+//             assert!(
+//                 self.dictionary.contains(&*guess),
+//                 "guess '{}' is not in the dictionary",
+//                 guess
+//             );
+//             let correctness = Correctness::compute(answer, &guess);
+//             history.push(Guess {
+//                 word: Cow::Owned(guess),
+//                 mask: correctness,
+//             });
+//         }
+//         None
+//     }
+// }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Correctness {
@@ -255,83 +255,83 @@ mod tests {
             check!("abcde" + [W W W W W] disallows "bcdea");
         }
     }
-    mod game {
-        use crate::{Guess, Wordle};
-
-        #[test]
-        fn genius() {
-            let w = Wordle::new();
-            let guesser = guesser!(|_history| { "right".to_string() });
-            assert_eq!(w.play("right", guesser), Some(1));
-        }
-
-        #[test]
-        fn magnificent() {
-            let w = Wordle::new();
-            let guesser = guesser!(|history| {
-                if history.len() == 1 {
-                    return "right".to_string();
-                }
-                "wrong".to_string()
-            });
-            assert_eq!(w.play("right", guesser), Some(2));
-        }
-
-        #[test]
-        fn impressive() {
-            let w = Wordle::new();
-            let guesser = guesser!(|history| {
-                if history.len() == 2 {
-                    return "right".to_string();
-                }
-                "wrong".to_string()
-            });
-            assert_eq!(w.play("right", guesser), Some(3));
-        }
-
-        #[test]
-        fn splendid() {
-            let w = Wordle::new();
-            let guesser = guesser!(|history| {
-                if history.len() == 3 {
-                    return "right".to_string();
-                }
-                "wrong".to_string()
-            });
-            assert_eq!(w.play("right", guesser), Some(4));
-        }
-
-        #[test]
-        fn great() {
-            let w = Wordle::new();
-            let guesser = guesser!(|history| {
-                if history.len() == 4 {
-                    return "right".to_string();
-                }
-                "wrong".to_string()
-            });
-            assert_eq!(w.play("right", guesser), Some(5));
-        }
-
-        #[test]
-        fn phew() {
-            let w = Wordle::new();
-            let guesser = guesser!(|history| {
-                if history.len() == 5 {
-                    return "right".to_string();
-                }
-                "wrong".to_string()
-            });
-            assert_eq!(w.play("right", guesser), Some(6));
-        }
-
-        #[test]
-        fn oops() {
-            let w = Wordle::new();
-            let guesser = guesser!(|_history| { "wrong".to_string() });
-            assert_eq!(w.play("right", guesser), None);
-        }
-    }
+    // mod game {
+    //     use crate::{Guess, Wordle};
+    //
+    //     #[test]
+    //     fn genius() {
+    //         let w = Wordle::new();
+    //         let guesser = guesser!(|_history| { "right".to_string() });
+    //         assert_eq!(w.play("right", guesser), Some(1));
+    //     }
+    //
+    //     #[test]
+    //     fn magnificent() {
+    //         let w = Wordle::new();
+    //         let guesser = guesser!(|history| {
+    //             if history.len() == 1 {
+    //                 return "right".to_string();
+    //             }
+    //             "wrong".to_string()
+    //         });
+    //         assert_eq!(w.play("right", guesser), Some(2));
+    //     }
+    //
+    //     #[test]
+    //     fn impressive() {
+    //         let w = Wordle::new();
+    //         let guesser = guesser!(|history| {
+    //             if history.len() == 2 {
+    //                 return "right".to_string();
+    //             }
+    //             "wrong".to_string()
+    //         });
+    //         assert_eq!(w.play("right", guesser), Some(3));
+    //     }
+    //
+    //     #[test]
+    //     fn splendid() {
+    //         let w = Wordle::new();
+    //         let guesser = guesser!(|history| {
+    //             if history.len() == 3 {
+    //                 return "right".to_string();
+    //             }
+    //             "wrong".to_string()
+    //         });
+    //         assert_eq!(w.play("right", guesser), Some(4));
+    //     }
+    //
+    //     #[test]
+    //     fn great() {
+    //         let w = Wordle::new();
+    //         let guesser = guesser!(|history| {
+    //             if history.len() == 4 {
+    //                 return "right".to_string();
+    //             }
+    //             "wrong".to_string()
+    //         });
+    //         assert_eq!(w.play("right", guesser), Some(5));
+    //     }
+    //
+    //     #[test]
+    //     fn phew() {
+    //         let w = Wordle::new();
+    //         let guesser = guesser!(|history| {
+    //             if history.len() == 5 {
+    //                 return "right".to_string();
+    //             }
+    //             "wrong".to_string()
+    //         });
+    //         assert_eq!(w.play("right", guesser), Some(6));
+    //     }
+    //
+    //     #[test]
+    //     fn oops() {
+    //         let w = Wordle::new();
+    //         let guesser = guesser!(|_history| { "wrong".to_string() });
+    //         assert_eq!(w.play("right", guesser), None);
+    //     }
+    // }
 
     mod compute {
         use crate::Correctness;
