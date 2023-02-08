@@ -2,24 +2,26 @@
 #![allow(clippy::blocks_in_if_conditions)]
 
 use std::{borrow::Cow, collections::HashSet, num::NonZeroU8};
-use wasm_bindgen::prelude::*;
+use wasm_bindgen::{prelude::*, convert::IntoWasmAbi, describe::WasmDescribe};
+use serde::Serialize;
 
+// #[repr(NonZeroU8)]
 #[wasm_bindgen]
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Serialize)]
 pub enum Correctness {
     /// Green
-    Correct = 2,
+    Correct = 3,
     /// Yellow
-    Misplaced = 1,
+    Misplaced = 2,
     /// Gray
-    Wrong = 0,
+    Wrong = 1,
 }
 
 #[wasm_bindgen]
-struct Evaluator {}
+pub struct Evaluator {}
 
-#[wasm_bindgen]
 impl Evaluator {
     fn is_misplaced(letter: u8, answer: &str, used: &mut [bool; 5]) -> bool {
         answer.bytes().enumerate().any(|(i, a)| {
@@ -31,7 +33,7 @@ impl Evaluator {
         })
     }
 
-    pub fn compute(answer: &str, guess: &str) -> Vec<u8> {
+    pub fn compute(answer: &str, guess: &str) -> Vec<Correctness> {
         assert_eq!(answer.len(), 5);
         assert_eq!(guess.len(), 5);
         let mut c = [Correctness::Wrong; 5];
@@ -58,7 +60,7 @@ impl Evaluator {
             }
         }
 
-        c.map(|v| v as u8).to_vec()
+        c.to_vec()
     }
 }
 
