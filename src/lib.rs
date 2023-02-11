@@ -1,15 +1,14 @@
 #![allow(clippy::type_complexity)]
 #![allow(clippy::blocks_in_if_conditions)]
 
-use std::{borrow::Cow, collections::HashSet, num::NonZeroU8};
-use wasm_bindgen::{prelude::*, convert::IntoWasmAbi, describe::WasmDescribe};
 use serde::Serialize;
+use std::{borrow::Cow, collections::HashSet, num::NonZeroU8};
+use wasm_bindgen::{convert::IntoWasmAbi, describe::WasmDescribe, prelude::*};
 
 // #[repr(NonZeroU8)]
 #[wasm_bindgen]
 #[repr(u8)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-#[derive(Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize)]
 pub enum Correctness {
     /// Green
     Correct = 3,
@@ -17,6 +16,16 @@ pub enum Correctness {
     Misplaced = 2,
     /// Gray
     Wrong = 1,
+}
+
+impl Into<JsValue> for Correctness {
+    fn into(self) -> JsValue {
+        match self {
+            Correctness::Correct => JsValue::from("correct"),
+            Correctness::Misplaced => JsValue::from("misplaced"),
+            Correctness::Wrong => JsValue::from("wrong"),
+        }
+    }
 }
 
 #[wasm_bindgen]
@@ -34,9 +43,10 @@ impl Evaluator {
     }
 
     pub fn compute(answer: &str, guess: &str) -> Vec<Correctness> {
-        assert_eq!(answer.len(), 5);
-        assert_eq!(guess.len(), 5);
-        let mut c = [Correctness::Wrong; 5];
+        // assert_eq!(answer.len(), 5);
+        assert_eq!(guess.len(), guess.len());
+        // let mut c = [Correctness::Wrong; 5];
+        let mut c = vec![Correctness::Wrong; guess.len()];
         let answer_bytes = answer.as_bytes();
         let guess_bytes = guess.as_bytes();
         // Array indexed by lowercase ascii letters
@@ -60,7 +70,19 @@ impl Evaluator {
             }
         }
 
-        c.to_vec()
+        c
+    }
+}
+
+#[wasm_bindgen]
+impl Evaluator {
+
+    #[wasm_bindgen]
+    pub fn evaluate(answer: &str, guess: &str) -> Vec<JsValue> {
+        return Evaluator::compute(answer, guess)
+            .iter()
+            .map(|&c| c.into())
+            .collect();
     }
 }
 
