@@ -7,3 +7,4 @@ roget-*
 callgrind.out.*
 entropy.dat
 plot.png
+corpus/target
